@@ -28,7 +28,7 @@ def job(run_path, file_path):
                     )
 
                     if now_step_per_sec * 3 < prev_step_per_sec:
-                        webhook_url = "https://hooks.slack.com/services/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"
+                        webhook_url = "your/webhook/url"
                         text = f"{run.name}の実行が終了または不明な理由で停止しました"
                         requests.post(webhook_url, data=json.dumps({"text": text}))
                         global flag
