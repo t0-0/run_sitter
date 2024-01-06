@@ -14,7 +14,7 @@ exit_flag = True
 
 def parse_args():
     parser = argparse.ArgumentParser("In addition to the arguments below, os.environ['SLACK_WEBHOOK_URL'] is required.")
-    parser.add_argument("run_path", type=str)
+    parser.add_argument("run_path", type=str, nargs=1)
     parser.add_argument("-f", "--file_path", type=str, default="./log.txt")
     parser.add_argument("-i", "--interval_in_min", type=int, default=10)
     parser.add_argument("-s", "--step_per_sec_factor", type=float, default=4)
@@ -30,7 +30,7 @@ def main():
 
     schedule.every(args.interval_in_min).minutes.do(
         job,
-        run_path=args.run_path,
+        run_path=args.run_path[0],
         file_path=args.file_path,
         step_per_sec_factor=args.step_per_sec_factor,
         slack_webhook_url=slack_webhook_url,
