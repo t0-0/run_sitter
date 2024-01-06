@@ -13,7 +13,7 @@ exit_flag = True
 
 
 def parse_args():
-    parser = argparse.ArgumentParser("In addition to the arguments below, os.environ(SLACK_WEBHOOK_URL) is required.")
+    parser = argparse.ArgumentParser("In addition to the arguments below, os.environ['SLACK_WEBHOOK_URL'] is required.")
     parser.add_argument("run_path", type=str, required=True)
     parser.add_argument("-f", "--file_path", type=str, default="./log.txt")
     parser.add_argument("-i", "--interval_in_min", type=int, default=10)
@@ -23,7 +23,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    slack_webhook_url = os.environ("SLACK_WEBHOOK_URL")
+    slack_webhook_url = os.environ["SLACK_WEBHOOK_URL"]
 
     if os.path.isfile(args.file_path):
         subprocess.call(["rm", args.file_path])
