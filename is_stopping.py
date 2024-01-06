@@ -1,16 +1,46 @@
+import argparse
 import json
 import os
+import requests
 import subprocess
 import time
 
-import requests
 import schedule
 import wandb
 
-flag = True
+
+exit_flag = True
 
 
-def job(run_path, file_path):
+def parse_args():
+    parser = argparse.ArgumentParser("In addition to the arguments below, os.environ(SLACK_WEBHOOK_URL) is required.")
+    parser.add_argument("run_path", type=str, required=True)
+    parser.add_argument("-f", "--file_path", type=str, default="./log.txt")
+    parser.add_argument("-i", "--interval_in_min", type=int, default=10)
+    parser.add_argument("-f", "--step_per_sec_factor", type=float, default=4)
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    slack_webhook_url = os.environ("SLACK_WEBHOOK_URL")
+
+    if os.path.isfile(args.file_path):
+        subprocess.call(["rm", args.file_path])
+
+    schedule.every(args.interval_in_min).minutes.do(
+        job,
+        run_path=args.run_path,
+        file_path=args.file_path,
+        step_per_sec_factor=args.step_per_sec_factor,
+        slack_webhook_url=slack_webhook_url,
+    )
+    while exit_flag:
+        schedule.run_pending()
+        time.sleep(5)
+
+
+def job(run_path, file_path, step_per_sec_factor, slack_webhook_url):
     run = wandb.Api().run(run_path)
 
     if os.path.isfile(file_path):
@@ -27,12 +57,11 @@ def job(run_path, file_path):
                     time.time() - lines[1][1]
                 )
 
-                if now_step_per_sec * 4 < prev_step_per_sec:
-                    webhook_url = "your/webhook/url"
-                    text = f"<!channel>\n{run.name}の実行が終了または不明な理由で停止しました"
-                    requests.post(webhook_url, data=json.dumps({"text": text}))
-                    global flag
-                    flag = False
+                if now_step_per_sec * step_per_sec_factor < prev_step_per_sec:
+                    text = f"<!channel>\n{run.name}: Execution terminated or failed for unknown reason."
+                    requests.post(slack_webhook_url, data=json.dumps({"text": text}))
+                    global exit_flag
+                    exit_flag = False
             else:
                 with open(file_path, "w") as f:
                     f.write(f"{lines[1][0]},{lines[1][1]}\n")
@@ -51,13 +80,4 @@ def job(run_path, file_path):
 
 
 if __name__ == "__main__":
-    run_path = "your/wandb/run/path"
-    file_path = "./log.txt"
-
-    if os.path.isfile(file_path):
-        subprocess.call(["rm", file_path])
-
-    schedule.every(10).minutes.do(job, run_path=run_path, file_path=file_path)
-    while flag:
-        schedule.run_pending()
-        time.sleep(1)
+    main()
