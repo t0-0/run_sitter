@@ -14,7 +14,7 @@ exit_flag = True
 
 def parse_args():
     parser = argparse.ArgumentParser("In addition to the arguments below, os.environ['SLACK_WEBHOOK_URL'] is required.")
-    parser.add_argument("run_path", type=str, required=True)
+    parser.add_argument("run_path", type=str, nargs=1)
     parser.add_argument("-f", "--file_path", type=str, default="./log.txt")
     parser.add_argument("-i", "--interval_in_min", type=int, default=10)
     parser.add_argument("-f", "--step_per_sec_factor", type=float, default=4)
