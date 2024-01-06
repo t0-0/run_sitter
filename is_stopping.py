@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument("run_path", type=str, nargs=1)
     parser.add_argument("-f", "--file_path", type=str, default="./log.txt")
     parser.add_argument("-i", "--interval_in_min", type=int, default=10)
-    parser.add_argument("-f", "--step_per_sec_factor", type=float, default=4)
+    parser.add_argument("-s", "--step_per_sec_factor", type=float, default=4)
     return parser.parse_args()
 
 
