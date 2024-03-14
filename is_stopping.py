@@ -43,6 +43,13 @@ def main():
 def job(run_path, file_path, step_per_sec_factor, slack_webhook_url):
     run = wandb.Api().run(run_path)
 
+    if run.state == 'finished':
+        text = f"<!channel>\n{run.name}: Execution completed successfully."
+        requests.post(slack_webhook_url, data=json.dumps({"text": text}))
+        global exit_flag
+        exit_flag = False
+        return
+
     if os.path.isfile(file_path):
         with open(file_path, "r") as f:
             lines = [line.rstrip() for line in f.readlines()]
