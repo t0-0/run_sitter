@@ -42,11 +42,11 @@ def main():
 
 def job(run_path, file_path, step_per_sec_factor, slack_webhook_url):
     run = wandb.Api().run(run_path)
+    global exit_flag
 
     if run.state == 'finished':
         text = f"<!channel>\n{run.name}: Execution completed successfully."
         requests.post(slack_webhook_url, data=json.dumps({"text": text}))
-        global exit_flag
         exit_flag = False
         return
 
@@ -67,7 +67,6 @@ def job(run_path, file_path, step_per_sec_factor, slack_webhook_url):
                 if now_step_per_sec * step_per_sec_factor < prev_step_per_sec:
                     text = f"<!channel>\n{run.name}: Execution terminated or failed for unknown reason."
                     requests.post(slack_webhook_url, data=json.dumps({"text": text}))
-                    global exit_flag
                     exit_flag = False
             else:
                 with open(file_path, "w") as f:
